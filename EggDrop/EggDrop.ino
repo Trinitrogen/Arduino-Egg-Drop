@@ -43,11 +43,57 @@ void setup(void) {
   delay(100);
 }
 
+void adafruit(bool output){
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+  /* Print out the values */
+  
+  if(output)
+  {
+    Serial.print("AccelX:");
+    Serial.print(a.acceleration.x/9.8);
+    Serial.print(",");
+    Serial.print("AccelY:");
+    Serial.print(a.acceleration.y/9.8);
+    Serial.print(",");
+    Serial.print("AccelZ:");
+    Serial.print(a.acceleration.z/9.8);
+    //Serial.print(",");
+    //Serial.print("GForce:");
+    //Serial.print((sqrt(sq(a.acceleration.x) + sq(a.acceleration.y) + sq(a.acceleration.z)))/9.8);
+    Serial.println("");
+  }
+  
+}
+
+void mpu6050(bool output){
+
+  /*
+ * * AFS_SEL | Full Scale Range | LSB Sensitivity
+* ——–+——————+—————-
+* 0 | +/- 2g | 8192 LSB/mg
+* 1 | +/- 4g | 4096 LSB/mg
+* 2 | +/- 8g | 2048 LSB/mg
+* 3 | +/- 16g | 1024 LSB/mg
+ */
+
+  int lsb = 2048;
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
+  Wire.endTransmission(false);
+  Wire.requestFrom(MPU_addr, 14, true); // request a total of 14 registers
+  AcX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
+  AcY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
+  AcZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
+
+  Serial.print(AcX/lsb);
+  Serial.print(","); Serial.print(AcY/lsb); 
+  Serial.print(","); Serial.println(AcZ/lsb);
+}
 void loop() {
 
   /* Get new sensor events with the readings */
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
+
   unsigned long currentMillis = millis();
   samples++;
 
@@ -58,33 +104,7 @@ void loop() {
       previousMillis = millis();
       samples = 0;
     }
-
-  /* Print out the values */
- /*
-  //Serial.print(millis());
-  Serial.print("AccelX:");
-  Serial.print(a.acceleration.x);
-  Serial.print(",");
-  Serial.print("AccelY:");
-  Serial.print(a.acceleration.y);
-  Serial.print(",");
-  Serial.print("AccelZ:");
-  Serial.print(a.acceleration.z);
-  //Serial.print(",");
-  //Serial.print("GForce:");
-  //Serial.print((sqrt(sq(a.acceleration.x) + sq(a.acceleration.y) + sq(a.acceleration.z)))/9.8);
-  Serial.println("");
-*/
-  Wire.beginTransmission(MPU_addr);
-  Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
-  Wire.endTransmission(false);
-  Wire.requestFrom(MPU_addr, 14, true); // request a total of 14 registers
-  AcX = Wire.read() << 8 | Wire.read(); // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)
-  AcY = Wire.read() << 8 | Wire.read(); // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
-  AcZ = Wire.read() << 8 | Wire.read(); // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-
-  Serial.print(AcX/1024);
-  Serial.print(","); Serial.print(AcY/1024);
-  Serial.print(","); Serial.println(AcZ/1024);
-
+    
+ adafruit(false);
+ //mpu6050(true);
 }
