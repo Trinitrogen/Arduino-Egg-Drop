@@ -22,10 +22,6 @@ void sdcardsetup(void){
   Serial.print("Initializing SD Card ");
   if (!SD.begin(4)) {
     Serial.println(" failed!");
-    while (1) {
-      Serial.println(" failed!");
-      delay(10);
-    }
     //return;
   }
   else {
@@ -35,7 +31,7 @@ void sdcardsetup(void){
 // Check if old output.csv exists, and delete it:
   if (SD.exists("output.csv")) {
     Serial.println("Deleting Old Output.csv");
-     SD.remove("example.txt");
+     SD.remove("output.csv");
   } 
   else {
     Serial.println("output.csv doesn't exist.");
@@ -46,11 +42,13 @@ void sdcardsetup(void){
   outputFile = SD.open("output.csv", FILE_WRITE);
   outputFile.println("Time,X,Y,Z");
   outputFile.close();
-  
 }
 
 void setup(void) {
   Serial.begin(115200);
+
+      //Setup SD Card
+  sdcardsetup();
 
   // Try to Initialize MPU Accelerometer
   if (!mpu.begin()) {
@@ -66,8 +64,7 @@ void setup(void) {
   delay(100);
 
 
-  //Setup SD Card
-  //sdcardsetup();
+
 }
 
 void adafruit(bool debug){
@@ -84,6 +81,11 @@ void adafruit(bool debug){
   Serial.print("AccelZ:");
   Serial.print(a.acceleration.z);
   Serial.println("");
+
+  outputFile = SD.open("output.csv", FILE_WRITE);
+  //outputFile.println(a.acceleration.x);
+  outputFile.println("Sample");
+  outputFile.close();
 
 }
 
