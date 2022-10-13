@@ -40,7 +40,7 @@ void sdcardsetup(void){
   //Open output.csv
   Serial.println("Creating output.csv");
   outputFile = SD.open("output.csv", FILE_WRITE);
-  outputFile.println("Time,X,Y,Z");
+  //outputFile.println("Time,X,Y,Z");
   outputFile.close();
 }
 
@@ -71,7 +71,8 @@ void adafruit(bool debug){
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
 
-  /* Print out the values */
+  if(debug) {
+      /* Print out the values */
   Serial.print("AccelX:");
   Serial.print(a.acceleration.x);
   Serial.print(",");
@@ -81,10 +82,16 @@ void adafruit(bool debug){
   Serial.print("AccelZ:");
   Serial.print(a.acceleration.z);
   Serial.println("");
+  }
+
 
   outputFile = SD.open("output.csv", FILE_WRITE);
   //outputFile.println(a.acceleration.x);
-  outputFile.println("Sample");
+  String output = "";
+  output = output + a.acceleration.x + "," + a.acceleration.y + "," + a.acceleration.z;
+  //String OutputString = a.acceleration.x;
+  //OutputString = OutputputString + ",";
+  outputFile.println(output);
   outputFile.close();
 
 }
@@ -131,7 +138,7 @@ void loop() {
       samples = 0;
     }
     
- adafruit(true);
+ adafruit(false);
 
   
  samples++;
